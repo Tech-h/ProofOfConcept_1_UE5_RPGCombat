@@ -2,9 +2,14 @@
 
 
 #include "PlayerCharacter.h"
+
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Components/InputComponent.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -12,7 +17,22 @@ APlayerCharacter::APlayerCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->TargetArmLength = 300.0f;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
+
+	SpringArm->bUsePawnControlRotation = true;
+	Camera->bUsePawnControlRotation = false;
 }
+
 
 // Called when the game starts or when spawned
 void APlayerCharacter::BeginPlay()
@@ -30,15 +50,16 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::Move(const FInputActionValue& Value)
 {
-	const FVector2D DirectionValue = Value.Get<FVector2D>();
+	//if (ActionState != EActionState::EAS_Unoccupied) return;
+	const FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller)
-	{
-		FVector Forward = GetActorForwardVector();
-		AddMovementInput(Forward, DirectionValue.Y);
-		FVector Right = GetActorRightVector();
-		AddMovementInput(Right, DirectionValue.X);
-	}
+	const FRotator Rotation = Controller->GetControlRotation();
+	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	AddMovementInput(ForwardDirection, MovementVector.Y);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	AddMovementInput(RightDirection, MovementVector.X);
 }
 
 void APlayerCharacter::Look(const FInputActionValue& Value)
@@ -48,8 +69,12 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookAxisValue.X);
 		AddControllerPitchInput(LookAxisValue.Y);
-		
 	}
+}
+
+void APlayerCharacter::Roll()
+{
+
 }
 
 // Called every frame
@@ -67,6 +92,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
+		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Roll);
 	}
 }
 

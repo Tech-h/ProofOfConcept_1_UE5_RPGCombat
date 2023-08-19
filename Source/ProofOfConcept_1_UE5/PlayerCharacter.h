@@ -9,6 +9,8 @@
 
 class UInputMappingContext;
 class UInputAction;
+class USpringArmComponent;
+class UCameraComponent;
 
 UCLASS()
 class PROOFOFCONCEPT_1_UE5_API APlayerCharacter : public ACharacter
@@ -18,17 +20,24 @@ class PROOFOFCONCEPT_1_UE5_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
+	virtual void Roll();
+	//virtual void Jump() ovverride;
+	//virtual void TakeDamage(float DamageAmount, Struct FDamageEvent const& DamageEvent, class AController* Event Investigator, AActor Enemy) override;
+	//virtual void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter) override;
+	//virtual void SetOverlappingItem(AItem* Item) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputMappingContext* InputMappingContext;
+		UInputMappingContext* InputMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputAction* MoveAction;
+		UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-	UInputAction* LookAction;
+		UInputAction* LookAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		UInputAction* RollAction;
 	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
@@ -39,5 +48,10 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		USpringArmComponent* SpringArm;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		UCameraComponent* Camera;
 
 };
