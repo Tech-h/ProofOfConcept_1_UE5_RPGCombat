@@ -21,6 +21,7 @@ APlayerCharacter::APlayerCharacter()
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
 	SpringArm->SetupAttachment(RootComponent);
@@ -72,15 +73,27 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void APlayerCharacter::Roll()
+void APlayerCharacter::Run(const FInputActionValue& Value)
 {
+	const bool Run = Value.Get<bool>();
 
+	if (Run == true && hasRun == false)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+		hasRun = true;
+	}
+	else
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+		hasRun = false;
+	}
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 
 }
 
@@ -92,7 +105,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-		EnhancedInputComponent->BindAction(RollAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Roll);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Run);
 	}
 }
 

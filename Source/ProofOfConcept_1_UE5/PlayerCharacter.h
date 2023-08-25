@@ -20,7 +20,6 @@ class PROOFOFCONCEPT_1_UE5_API APlayerCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APlayerCharacter();
-	virtual void Roll();
 	//virtual void Jump() ovverride;
 	//virtual void TakeDamage(float DamageAmount, Struct FDamageEvent const& DamageEvent, class AController* Event Investigator, AActor Enemy) override;
 	//virtual void GetHit_Implementation(const FVector& ImpactPoint, AActor* Hitter) override;
@@ -37,10 +36,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-		UInputAction* RollAction;
+		UInputAction* RunAction;
 	
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Run(const FInputActionValue& Value);
+
+	bool hasRun = false;
 
 public:	
 	// Called every frame
